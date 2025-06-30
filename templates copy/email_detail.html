@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Response Assistant - {{ email.subject }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        
+        .back-btn {
+            background-color: #6c757d;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .back-btn:hover {
+            background-color: #545b62;
+        }
+        
+        .urgency-display {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .urgency-badge {
+            padding: 6px 12px;
+            border-radius: 15px;
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 12px;
+        }
+        
+        .urgency-1 { background-color: #d4edda; color: #155724; }
+        .urgency-2 { background-color: #d1ecf1; color: #0c5460; }
+        .urgency-3 { background-color: #fff3cd; color: #856404; }
+        .urgency-4 { background-color: #f8d7da; color: #721c24; }
+        .urgency-5 { background-color: #f5c6cb; color: #721c24; }
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+        
+        .email-section, .response-section {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 25px;
+        }
+        
+        .email-header {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #eee;
+        }
+        
+        .email-subject {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        
+        .email-meta {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .email-body {
+            line-height: 1.6;
+            color: #333;
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 5px;
+            border-left: 4px solid #007bff;
+        }
+        
+        .routes-section {
+            margin-bottom: 30px;
+        }
+        
+        .routes-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .route-card {
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .route-card:hover {
+            border-color: #007bff;
+            background-color: #f8f9fa;
+        }
+        
+        .route-card.selected {
+            border-color: #007bff;
+            background-color: #e3f2fd;
+        }
+        
+        .route-name {
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 8px;
+        }
+        
+        .route-preview {
+            font-size: 13px;
+            color: #666;
+        }
+        
+        .variations-section {
+            display: none;
+            margin-top: 20px;
+        }
+        
+        .variation-card {
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .variation-card:hover {
+            border-color: #007bff;
+            background-color: #f8f9fa;
+        }
+        
+        .variation-card.selected {
+            border-color: #007bff;
+            background-color: #e3f2fd;
+        }
+        
+        .response-editor {
+            display: none;
+            margin-top: 20px;
+        }
+        
+        .response-textarea {
+            width: 100%;
+            min-height: 200px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+            line-height: 1.5;
+            resize: vertical;
+        }
+        
+        .ai-edit-section {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+        }
+        
+        .instruction-input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-right: 10px;
+        }
+        
+        .btn-primary {
+            background-color: #007bff;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #0056b3;
+        }
+        
+        .btn-secondary {
+            background-color: #6c757d;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #545b62;
+        }
+        
+        .btn-success {
+            background-color: #28a745;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background-color: #1e7e34;
+        }
+        
+        .btn:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 10px;
+            color: #666;
+            font-style: italic;
+        }
+        
+        h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+        }
+        
+        h3 {
+            color: #495057;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <a href="/" class="back-btn">← Back to Email List</a>
+        <div class="urgency-display">
+            <span>Priority Level:</span>
+            <span class="urgency-badge urgency-{{ urgency }}">{{ urgency }}/5</span>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <!-- Email Section -->
+        <div class="email-section">
+            <h2>📧 Original Email</h2>
+            
+            <div class="email-header">
+                <div class="email-subject">{{ email.subject }}</div>
+                <div class="email-meta">
+                    <strong>From:</strong> {{ email.sender }}<br>
+                    <strong>Date:</strong> {{ email.timestamp }}
+                </div>
+            </div>
+            
+            <div class="email-body">
+                {{ email.body }}
+            </div>
+        </div>
+
+        <!-- Response Section -->
+        <div class="response-section">
+            <h2>🤖 AI Response Generator</h2>
+            
+            <!-- Routes Selection -->
+            <div class="routes-section">
+                <h3>Step 1: Choose Response Route</h3>
+                <div class="routes-grid">
+                    {% for route in routes %}
+                        <div class="route-card" data-route-index="{{ loop.index0 }}">
+                            <div class="route-name">{{ route.name }}</div>
+                            <div class="route-preview">{{ route.variations[0][:100] }}...</div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Variations Selection -->
+            <div class="variations-section" id="variations-section">
+                <h3>Step 2: Choose Response Style</h3>
+                <div id="variations-container"></div>
+            </div>
+
+            <!-- Response Editor -->
+            <div class="response-editor" id="response-editor">
+                <h3>Step 3: Edit Your Response</h3>
+                <textarea class="response-textarea" id="response-text" placeholder="Your response will appear here..."></textarea>
+                
+                <div class="ai-edit-section">
+                    <h4>AI Assistant</h4>
+                    <input type="text" class="instruction-input" id="edit-instructions" 
+                           placeholder="Tell the AI how to modify your response (e.g., 'make it more formal', 'add a deadline')">
+                    <div>
+                        <button class="btn btn-secondary" onclick="editWithAI()">✨ Edit with AI</button>
+                        <button class="btn btn-success" onclick="saveResponse()">💾 Save Response</button>
+                    </div>
+                    <div class="loading" id="edit-loading">AI is editing your response...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Store data in hidden script tags to avoid template issues -->
+    <script type="application/json" id="routes-data">{{ routes | tojson }}</script>
+    <script type="application/json" id="email-data">{{ email.id }}</script>
+
+    <script>
+        // Get data from script tags to avoid template rendering issues
+        var routesData = document.getElementById('routes-data').textContent;
+        var emailData = document.getElementById('email-data').textContent;
+        
+        var routes = JSON.parse(routesData);
+        var emailId = parseInt(emailData);
+        var selectedRoute = null;
+        var selectedVariation = null;
+
+        // Add event listeners when page loads
+        window.onload = function() {
+            var routeCards = document.querySelectorAll('.route-card');
+            for (var i = 0; i < routeCards.length; i++) {
+                routeCards[i].onclick = function() {
+                    var routeIndex = parseInt(this.getAttribute('data-route-index'));
+                    selectRoute(routeIndex);
+                };
+            }
+        };
+
+        function selectRoute(routeIndex) {
+            // Remove previous selections
+            var routeCards = document.querySelectorAll('.route-card');
+            for (var i = 0; i < routeCards.length; i++) {
+                routeCards[i].classList.remove('selected');
+            }
+            
+            // Select new route
+            routeCards[routeIndex].classList.add('selected');
+            selectedRoute = routeIndex;
+            
+            // Show variations
+            showVariations(routeIndex);
+        }
+
+        function showVariations(routeIndex) {
+            var route = routes[routeIndex];
+            var container = document.getElementById('variations-container');
+            
+            container.innerHTML = '';
+            
+            for (var i = 0; i < route.variations.length; i++) {
+                var variation = route.variations[i];
+                var card = document.createElement('div');
+                card.className = 'variation-card';
+                card.innerHTML = '<div style="margin-bottom: 8px;"><strong>Option ' + (i + 1) + '</strong></div><div>' + variation + '</div>';
+                
+                // Store data attributes for the click handler
+                card.setAttribute('data-index', i);
+                card.setAttribute('data-text', variation);
+                card.onclick = handleVariationClick;
+                
+                container.appendChild(card);
+            }
+            
+            document.getElementById('variations-section').style.display = 'block';
+        }
+
+        function handleVariationClick() {
+            var index = parseInt(this.getAttribute('data-index'));
+            var text = this.getAttribute('data-text');
+            selectVariation(index, text);
+        }
+
+        function selectVariation(variationIndex, variationText) {
+            // Remove previous selections
+            var variationCards = document.querySelectorAll('.variation-card');
+            for (var i = 0; i < variationCards.length; i++) {
+                variationCards[i].classList.remove('selected');
+            }
+            
+            // Select new variation
+            variationCards[variationIndex].classList.add('selected');
+            selectedVariation = variationIndex;
+            
+            // Load into editor
+            document.getElementById('response-text').value = variationText;
+            document.getElementById('response-editor').style.display = 'block';
+        }
+
+        function editWithAI() {
+            var currentResponse = document.getElementById('response-text').value;
+            var instructions = document.getElementById('edit-instructions').value.trim();
+            
+            if (!instructions) {
+                alert('Please provide instructions for how to edit the response.');
+                return;
+            }
+            
+            var loading = document.getElementById('edit-loading');
+            loading.style.display = 'block';
+            
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', '/api/edit-response', true);
+            xhr.setRequestHeader('Content-Type', 'application/json');
+            
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === 4) {
+                    loading.style.display = 'none';
+                    
+                    if (xhr.status === 200) {
+                        var data = JSON.parse(xhr.responseText);
+                        if (data.error) {
+                            alert('Error: ' + data.error);
+                        } else {
+                            document.getElementById('response-text').value = data.edited_response;
+                            document.getElementById('edit-instructions').value = '';
+                        }
+                    } else {
+                        alert('Error editing response');
+                    }
+                }
+            };
+            
+            var requestData = JSON.stringify({
+                response: currentResponse,
+                instructions: instructions
+            });
+            
+            xhr.send(requestData);
+        }
+
+        function saveResponse() {
+            var finalResponse = document.getElementById('response-text').value;
+            
+            if (!finalResponse.trim()) {
+                alert('Please enter a response before saving.');
+                return;
+            }
+            
+            if (selectedRoute === null || selectedVariation === null) {
+                alert('Please select a route and variation before saving.');
+                return;
+            }
+            
+            var routeName = routes[selectedRoute].name;
+            var variationText = routes[selectedRoute].variations[selectedVariation];
+            
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', '/api/save-selection', true);
+            xhr.setRequestHeader('Content-Type', 'application/json');
+            
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === 4) {
+                    if (xhr.status === 200) {
+                        var data = JSON.parse(xhr.responseText);
+                        if (data.error) {
+                            alert('Error: ' + data.error);
+                        } else {
+                            alert('Response saved successfully!');
+                        }
+                    } else {
+                        alert('Error saving response');
+                    }
+                }
+            };
+            
+            var requestData = JSON.stringify({
+                email_id: emailId,
+                route_name: routeName,
+                variation: variationText,
+                final_response: finalResponse
+            });
+            
+            xhr.send(requestData);
+        }
+    </script>
+</body>
+</html>
